@@ -297,3 +297,43 @@ class Client():
 
         res = self.__request('GrantedDBs', 'main', req)
         return xmltodict.parse(et.tostring(res))['qdbapi']
+
+    # Let's hotrod out the pyqb Client and add in a getUserID, getUserRole, and changeUserRole method
+    def addUser(self, database=None, roleid=None, userEmail=None, 
+                userFirst=None, userLast=None):
+        if database is None:
+            database = self.database
+        req = {'roleid':roleid, 'email':userEmail, 'fname':userFirst, 'lname':userLast}
+        res = self.__request("ProvisionUser", database, req)
+        return xmltodict.parse(et.tostring(res))['qdbapi']
+
+    def getUserID(self, userEmail=None):
+        req = {'email':userEmail}
+        res = self.__request("GetUserInfo", 'main', req)
+        return xmltodict.parse(et.tostring(res))['qdbapi']['user']['@id']
+
+    def sendInvite(self, database=None, userid=None, messageText=None):
+        if database is None:
+            database = self.database
+        req = {'userid':userid, 'usertext':messageText}
+        res = self.__request("SendInvitation", database, req)
+        return xmltodict.parse(et.tostring(res))['qdbapi']
+
+    def changeUserRole(self, database=None, userid=None, roleid='9', newroleid=None):
+        if database is None:
+            database = self.database
+        req = {'userid':userid, 'roleid':roleid}
+        if newroleid is not None:
+            req['newroleid'] = newroleid
+        res = self.__request("ChangeUserRole", database, req)
+        return xmltodict.parse(et.tostring(res))['qdbapi']
+
+    def getAllUserData(self, userEmail=None):
+        req = {'email':userEmail}
+        res = self.__request("GetUserInfo", 'main', req)
+        return xmltodict.parse(et.tostring(res))['qdbapi']
+
+    def getUserRole(self, database=None, userid=None):
+        req = {'userid':userid}
+        res = self.__request("GetUserRole", database, req)
+        return xmltodict.parse(et.tostring(res))['qdbapi']['user']['roles']['role']['@id']
